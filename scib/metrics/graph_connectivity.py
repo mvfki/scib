@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.sparse.csgraph import connected_components
 
 
-def graph_connectivity(adata, label_key):
+def graph_connectivity(adata, label_key, return_all=False):
     """Graph Connectivity
 
     Quantify the connectivity of the subgraph per cell type label.
@@ -18,6 +18,7 @@ def graph_connectivity(adata, label_key):
 
     :param adata: integrated adata with computed neighborhood graph
     :param label_key: name in adata.obs containing the cell identity labels
+    :param return_all: Bool. Whether to return score for each label category instead of the mean. Default `False`.
 
     This function can be applied to all integration output types.
     The integrated object (``adata``) needs to have a kNN graph based on the integration output.
@@ -55,5 +56,7 @@ def graph_connectivity(adata, label_key):
         )
         tab = pd.value_counts(labels)
         clust_res.append(tab.max() / sum(tab))
-
+    if return_all:
+        all_res = pd.DataFrame({label_key: adata.obs[label_key].cat.categories, 'graph_connectivity': clust_res})
+        return all_res
     return np.mean(clust_res)
